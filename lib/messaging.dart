@@ -7,8 +7,18 @@ class Messaging extends StatelessWidget {
 
   Messaging({this.wavesharkBluetooth});
 
+  void sendTestMessage() {
+    wavesharkBluetooth.sendMessage("Test message");
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Text("TODO: Send/receive messages");
+    return Column(children: <Widget>[
+      FlatButton(
+          color: Colors.blue,
+          textColor: Colors.white,
+          onPressed: sendTestMessage,
+          child: Text("Send test message")),
+    ]);
   }
 }

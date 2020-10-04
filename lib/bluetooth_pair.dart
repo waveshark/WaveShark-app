@@ -61,11 +61,6 @@ class BluetoothPairState extends State<BluetoothPair> {
     List<int> bytesRead = await _readCharacteristic.read();
     print("Test read from server [" + String.fromCharCodes(bytesRead) + "]");
 
-    // TODO: Do this elsewhere
-    // await writeCharacteristic.setNotifyValue(true);
-    await _writeCharacteristic.write(utf8.encode("Test from app"));
-    print("Test message sent to server");
-
     // We're paired now
     setWavesharkBluetooth(new WavesharkBluetooth(_devices[deviceName], _readCharacteristic, _writeCharacteristic));
     setPaired(true);
