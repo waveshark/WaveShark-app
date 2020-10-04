@@ -1,5 +1,5 @@
 import "package:flutter/material.dart";
-import 'package:waveshark/waveshark_bluetooth.dart';
+import "package:waveshark/waveshark_bluetooth.dart";
 
 import "./bluetooth_pair.dart";
 

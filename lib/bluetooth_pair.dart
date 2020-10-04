@@ -3,7 +3,7 @@ import "package:flutter/material.dart";
 import "package:flutter_blue/flutter_blue.dart";
 import "dart:convert";
 
-import 'package:waveshark/waveshark_bluetooth.dart';
+import "package:waveshark/waveshark_bluetooth.dart";
 
 class BluetoothPair extends StatefulWidget {
   Function getPaired;
