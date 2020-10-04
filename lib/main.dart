@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:waveshark/messaging.dart";
 import "package:waveshark/waveshark_bluetooth.dart";
 
 import "./bluetooth_pair.dart";
@@ -60,7 +61,7 @@ class _MyHomePageState extends State<MyHomePage> {
             children: <Widget>[
               Center(
                   child: _paired
-                      ? Text("TODO: Paired, now show basic Messenger Widget")
+                      ? Messaging(wavesharkBluetooth: _wavesharkBluetooth)
                       : BluetoothPair(
                           getPaired: getPaired,
                           setPaired: setPaired,
