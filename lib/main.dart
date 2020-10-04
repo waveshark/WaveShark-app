@@ -31,7 +31,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  bool _paired = false;
+  bool _paired = false; // TODO: Get from persistent storage?
   WavesharkBluetooth _wavesharkBluetooth;
 
   bool getPaired() {
@@ -40,12 +40,11 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void setPaired(paired) {
     setState(() {
-      _paired = paired;
+      _paired = paired; // TODO: Place in persistent storage?
     });
   }
 
-  void setWavesharkBluetooth(wavesharkBluetooth)
-  {
+  void setWavesharkBluetooth(wavesharkBluetooth) {
     _wavesharkBluetooth = wavesharkBluetooth;
   }
 
@@ -57,13 +56,16 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Center(
-              child: BluetoothPair(getPaired: getPaired, setPaired: setPaired, setWavesharkBluetooth: setWavesharkBluetooth)
-            )
-          ],
-        ),
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Center(
+                  child: _paired
+                      ? Text("TODO: Paired, now show basic Messenger Widget")
+                      : BluetoothPair(
+                          getPaired: getPaired,
+                          setPaired: setPaired,
+                          setWavesharkBluetooth: setWavesharkBluetooth))
+            ]),
       ),
     );
   }
