@@ -35,6 +35,10 @@ class _MyHomePageState extends State<MyHomePage> {
   bool _paired = false; // TODO: Get from persistent storage?
   WavesharkBluetooth _wavesharkBluetooth;
 
+  void messageReceived(message) {
+    print("Received message from WaveShark device [" + message + "]");
+  }
+
   bool getPaired() {
     return _paired;
   }
@@ -65,7 +69,8 @@ class _MyHomePageState extends State<MyHomePage> {
                       : BluetoothPair(
                           getPaired: getPaired,
                           setPaired: setPaired,
-                          setWavesharkBluetooth: setWavesharkBluetooth))
+                          setWavesharkBluetooth: setWavesharkBluetooth,
+                          messageReceived: messageReceived))
             ]),
       ),
     );
