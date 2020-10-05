@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 import "package:waveshark/messaging.dart";
-import "package:waveshark/waveshark_bluetooth.dart";
+import 'package:waveshark/waveshark_bluetooth.dart';
 
 import "./bluetooth_pair.dart";
 
@@ -32,11 +32,12 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  bool _paired = false; // TODO: Get from persistent storage?
   WavesharkBluetooth _wavesharkBluetooth;
+  bool _paired = false; // TODO: Get from persistent storage?
 
-  void messageReceived(message) {
-    print("Received message from WaveShark device [" + message + "]");
+  void setWavesharkBluetooth(wavesharkBluetooth)
+  {
+    _wavesharkBluetooth = wavesharkBluetooth;
   }
 
   bool getPaired() {
@@ -47,10 +48,6 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       _paired = paired; // TODO: Place in persistent storage?
     });
-  }
-
-  void setWavesharkBluetooth(wavesharkBluetooth) {
-    _wavesharkBluetooth = wavesharkBluetooth;
   }
 
   @override
@@ -65,12 +62,9 @@ class _MyHomePageState extends State<MyHomePage> {
             children: <Widget>[
               Center(
                   child: _paired
-                      ? Messaging(wavesharkBluetooth: _wavesharkBluetooth)
+                      ? Messaging(_wavesharkBluetooth)
                       : BluetoothPair(
-                          getPaired: getPaired,
-                          setPaired: setPaired,
-                          setWavesharkBluetooth: setWavesharkBluetooth,
-                          messageReceived: messageReceived))
+                          getPaired: getPaired, setPaired: setPaired, setWavesharkBluetooth: setWavesharkBluetooth))
             ]),
       ),
     );

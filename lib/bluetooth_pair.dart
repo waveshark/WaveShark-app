@@ -9,21 +9,19 @@ class BluetoothPair extends StatefulWidget {
   Function getPaired;
   Function setPaired;
   Function setWavesharkBluetooth;
-  Function messageReceived;
 
-  BluetoothPair({@required this.getPaired, @required this.setPaired, @required this.setWavesharkBluetooth, @required this.messageReceived});
+  BluetoothPair({@required this.getPaired, @required this.setPaired, @required this.setWavesharkBluetooth});
 
   @override
-  BluetoothPairState createState() => BluetoothPairState(getPaired: getPaired, setPaired: setPaired, setWavesharkBluetooth: setWavesharkBluetooth, messageReceived: messageReceived);
+  BluetoothPairState createState() => BluetoothPairState(getPaired: getPaired, setPaired: setPaired, setWavesharkBluetooth: setWavesharkBluetooth);
 }
 
 class BluetoothPairState extends State<BluetoothPair> {
   Function getPaired;
   Function setPaired;
   Function setWavesharkBluetooth;
-  Function messageReceived;
 
-  BluetoothPairState({@required this.getPaired, @required this.setPaired, @required this.setWavesharkBluetooth, @required this.messageReceived});
+  BluetoothPairState({@required this.getPaired, @required this.setPaired, @required this.setWavesharkBluetooth});
 
   final String _desiredServiceUUID             = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
   final String _desiredReadCharacteristicUUID  = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
@@ -59,14 +57,10 @@ class BluetoothPairState extends State<BluetoothPair> {
       }
     });
 
-    // Get notifications on server value changes
-    await _readCharacteristic.setNotifyValue(true);
-    _readCharacteristic.value.listen((event) {
-      messageReceived(String.fromCharCodes(event.toList()));
-    });
-
     // We're paired now
-    setWavesharkBluetooth(new WavesharkBluetooth(_devices[deviceName], _readCharacteristic, _writeCharacteristic));
+    var wavesharkBluetooth = new WavesharkBluetooth(_devices[deviceName], _readCharacteristic, _writeCharacteristic);
+    wavesharkBluetooth.subscribeToNotifications();
+    setWavesharkBluetooth(wavesharkBluetooth);
     setPaired(true);
   }
 
