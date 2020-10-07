@@ -40,7 +40,7 @@ class BluetoothPairState extends State<BluetoothPair> {
   @override
   void initState() {
     super.initState();
-    // _loadSettings();
+    _loadSettings();
     WidgetsBinding.instance.addPostFrameCallback((_) => scanForDevices());
   }
 
