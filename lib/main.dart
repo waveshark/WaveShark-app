@@ -1,8 +1,8 @@
 import "package:flutter/material.dart";
-import "package:waveshark/messaging.dart";
-import 'package:waveshark/waveshark_bluetooth.dart';
 
-import "./bluetooth_pair.dart";
+import "package:waveshark/messaging.dart";
+import "package:waveshark/waveshark_bluetooth.dart";
+import "package:waveshark/bluetooth_pair.dart";
 
 void main() {
   runApp(MyApp());
@@ -33,11 +33,18 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   WavesharkBluetooth _wavesharkBluetooth;
-  bool _paired = false; // TODO: Get from persistent storage?
+  bool _paired = false;
+
+  WavesharkBluetooth getWavesharkBluetooth() {
+    return _wavesharkBluetooth;
+  }
 
   void setWavesharkBluetooth(wavesharkBluetooth)
   {
-    _wavesharkBluetooth = wavesharkBluetooth;
+    setState(() {
+      _wavesharkBluetooth = wavesharkBluetooth;
+      _wavesharkBluetooth.subscribeToNotifications();
+    });
   }
 
   bool getPaired() {
@@ -46,27 +53,29 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void setPaired(paired) {
     setState(() {
-      _paired = paired; // TODO: Place in persistent storage?
+      _paired = paired;
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    var _bluetoothPair = BluetoothPair(
+        getPaired: getPaired,
+        setPaired: setPaired,
+        setWavesharkBluetooth: setWavesharkBluetooth);
+
+    var _messaging = Messaging(getWavesharkBluetooth: getWavesharkBluetooth);
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Center(
-                  child: _paired
-                      ? Messaging(_wavesharkBluetooth)
-                      : BluetoothPair(
-                          getPaired: getPaired, setPaired: setPaired, setWavesharkBluetooth: setWavesharkBluetooth))
-            ]),
-      ),
-    );
+        appBar: AppBar(
+          title: Text(widget.title),
+        ),
+        body: Center(
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+              Visibility(visible: !_paired, child: _bluetoothPair),
+              Visibility(visible: _paired, child: _messaging)
+            ])));
   }
 }

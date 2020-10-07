@@ -1,27 +1,60 @@
 import "package:flutter/material.dart";
 
 import "package:flutter_blue/flutter_blue.dart";
+import "package:shared_preferences/shared_preferences.dart";
 import "dart:convert";
 
 import "package:waveshark/waveshark_bluetooth.dart";
 
 class BluetoothPair extends StatefulWidget {
+  Function setWavesharkBluetooth;
   Function getPaired;
   Function setPaired;
-  Function setWavesharkBluetooth;
 
-  BluetoothPair({@required this.getPaired, @required this.setPaired, @required this.setWavesharkBluetooth});
+  BluetoothPair(
+      {@required this.setWavesharkBluetooth,
+      @required this.getPaired,
+      @required this.setPaired});
 
   @override
-  BluetoothPairState createState() => BluetoothPairState(getPaired: getPaired, setPaired: setPaired, setWavesharkBluetooth: setWavesharkBluetooth);
+  BluetoothPairState createState() => BluetoothPairState(
+      setWavesharkBluetooth: setWavesharkBluetooth,
+      getPaired: getPaired,
+      setPaired: setPaired);
 }
 
 class BluetoothPairState extends State<BluetoothPair> {
+  bool _scanning = true;
+
+  Function setWavesharkBluetooth;
   Function getPaired;
   Function setPaired;
-  Function setWavesharkBluetooth;
 
-  BluetoothPairState({@required this.getPaired, @required this.setPaired, @required this.setWavesharkBluetooth});
+  BluetoothPairState(
+      {@required this.setWavesharkBluetooth,
+      @required this.getPaired,
+      @required this.setPaired});
+
+  String _deviceName;
+
+  @override
+  void initState() {
+    super.initState();
+    // _loadSettings();
+    WidgetsBinding.instance.addPostFrameCallback((_) => scanForDevices());
+  }
+
+  void _loadSettings() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _deviceName = (prefs.getString('deviceName') ?? null);
+    });
+  }
+
+  void _saveSettings() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString("deviceName", _deviceName);
+  }
 
   final String _desiredServiceUUID             = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
   final String _desiredReadCharacteristicUUID  = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
@@ -40,17 +73,20 @@ class BluetoothPairState extends State<BluetoothPair> {
     print("Connected to device [" + deviceName + "]");
 
     // Discover services
-    List<BluetoothService> services = await _devices[deviceName].discoverServices();
+    List<BluetoothService> services =
+        await _devices[deviceName].discoverServices();
 
     // Find desired service and desired characteristics
     services.forEach((service) {
       if (service.uuid.toString() == _desiredServiceUUID) {
         service.characteristics.forEach((characteristic) {
-          if (characteristic.uuid.toString() == _desiredReadCharacteristicUUID) {
+          if (characteristic.uuid.toString() ==
+              _desiredReadCharacteristicUUID) {
             _readCharacteristic = characteristic;
           }
 
-          if (characteristic.uuid.toString() == _desiredWriteCharacteristicUUID) {
+          if (characteristic.uuid.toString() ==
+              _desiredWriteCharacteristicUUID) {
             _writeCharacteristic = characteristic;
           }
         });
@@ -58,16 +94,25 @@ class BluetoothPairState extends State<BluetoothPair> {
     });
 
     // We're paired now
-    var wavesharkBluetooth = new WavesharkBluetooth(_devices[deviceName], _readCharacteristic, _writeCharacteristic);
-    wavesharkBluetooth.subscribeToNotifications();
-    setWavesharkBluetooth(wavesharkBluetooth);
+    setWavesharkBluetooth(WavesharkBluetooth(
+        _devices[deviceName], _readCharacteristic, _writeCharacteristic));
+    _deviceName = deviceName;
+    await _saveSettings();
     setPaired(true);
   }
 
-  void scanForDevices() async {
+  void scanForDevices() {
     // Start scanning
+    // TODO: Make scan time (currently 5 seconds) a constant
     FlutterBlue flutterBlue = FlutterBlue.instance;
-    await flutterBlue.startScan(timeout: Duration(seconds: 5));
+    flutterBlue.startScan(timeout: Duration(seconds: 5)).then((value) {
+      // Stop scanning
+      setState(() {
+        _scanning = false;
+      });
+      flutterBlue.stopScan();
+      // subscription.cancel(); // TODO: Is this needed?
+    });
 
     // Listen to scan results
     flutterBlue.scanResults.listen((results) {
@@ -76,35 +121,36 @@ class BluetoothPairState extends State<BluetoothPair> {
           setState(() {
             _devices.putIfAbsent(r.device.name, () => r.device);
           });
+
+          // Auto-connect if this is the device name stored in settings
+          if (r.device.name == _deviceName) {
+            // TODO: Handle case where the stored device name is not available for connection
+            connectToDevice(_deviceName);
+          }
         }
       }
     });
-
-    // TODO: Stop scanning
-    // subscription.cancel();
-    // flutterBlue.stopScan();
   }
 
   @override
   Widget build(BuildContext context) {
-    return getPaired()
-        ? Text("You are paired with a WaveShark device")
-        : Container(
-            child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                FlatButton(
-                    color: Colors.blue,
-                    textColor: Colors.white,
-                    onPressed: scanForDevices,
-                    child: Text("Tap to scan for WaveShark devices")),
-                ..._devices.keys.map((deviceName) {
-                  return FlatButton(
-                      color: Colors.green,
-                      textColor: Colors.white,
-                      onPressed: () => connectToDevice(deviceName),
-                      child: Text("Pair with " + deviceName));
-                })
-              ]));
+    return _scanning
+        ? Column(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Text("Scanning for devices"),
+              CircularProgressIndicator()
+            ],
+          )
+        : Column(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
+            Text("Choose a device to pair with"),
+            ..._devices.keys.map((deviceName) {
+              return FlatButton(
+                  color: Colors.green,
+                  textColor: Colors.white,
+                  onPressed: () => connectToDevice(deviceName),
+                  child: Text(deviceName));
+            })
+          ]);
   }
 }

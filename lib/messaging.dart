@@ -1,28 +1,21 @@
 import "package:flutter/material.dart";
-import 'package:waveshark/waveshark_bluetooth.dart';
-// import "package:waveshark/waveshark_bluetooth.dart"
 
-// TODO: Convert to StatefulWidget
-class Messaging extends StatelessWidget {
-  WavesharkBluetooth _wavesharkBluetooth;
+import "package:waveshark/waveshark_bluetooth.dart";
 
-  Messaging(wavesharkBluetooth)
+class MessagingState extends State<Messaging> {
+  Function _getWavesharkBluetooth;
+
+  MessagingState(getWavesharkBluetooth)
   {
-    _wavesharkBluetooth = wavesharkBluetooth;
-    _wavesharkBluetooth.setOnMessageReceived(onMessageReceived);
-  }
-
-  void onMessageReceived(message)
-  {
-    // TODO: Add to List<String> of messages, call setState()
-    print("Message received from BLE server [" + message + "]");
+    _getWavesharkBluetooth = getWavesharkBluetooth;
   }
 
   // TODO: Add to List<String> of messages, call setState()
   void sendTestMessage() {
-    _wavesharkBluetooth.sendMessage("Test message");
+    _getWavesharkBluetooth().sendMessage("Test message");
   }
 
+  // TODO: Display incoming and outgoing messages
   @override
   Widget build(BuildContext context) {
     return Column(children: <Widget>[
@@ -33,4 +26,14 @@ class Messaging extends StatelessWidget {
           child: Text("Send test message")),
     ]);
   }
+}
+
+class Messaging extends StatefulWidget {
+  Function getWavesharkBluetooth;
+
+  Messaging({this.getWavesharkBluetooth});
+
+  @override
+  MessagingState createState() =>
+      MessagingState(getWavesharkBluetooth);
 }

@@ -6,7 +6,6 @@ class WavesharkBluetooth {
   BluetoothDevice _bluetoothDevice;
   BluetoothCharacteristic _readCharacteristic;
   BluetoothCharacteristic _writeCharacteristic;
-  Function _onMessageReceived;
 
   WavesharkBluetooth(bluetoothDevice, readCharacteristic, writeCharacteristic) {
     _bluetoothDevice = bluetoothDevice;
@@ -14,17 +13,12 @@ class WavesharkBluetooth {
     _writeCharacteristic = writeCharacteristic;
   }
 
-  void setOnMessageReceived(onMessageReceived)
-  {
-    _onMessageReceived = onMessageReceived;
-  }
-
   void subscribeToNotifications() async
   {
     // Get notifications on server value changes
     await _readCharacteristic.setNotifyValue(true);
     _readCharacteristic.value.listen((event) {
-      _onMessageReceived(String.fromCharCodes(event.toList()));
+      print("Message received from BLE server [" + String.fromCharCodes(event.toList()) + "]");
     });
   }
 
