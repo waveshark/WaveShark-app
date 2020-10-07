@@ -2,11 +2,13 @@ import "package:flutter/material.dart";
 
 import "package:flutter_blue/flutter_blue.dart";
 import "dart:convert";
+import "dart:async";
 
 class Messaging extends StatefulWidget {
   BluetoothDevice _bluetoothDevice;
   BluetoothCharacteristic _readCharacteristic;
   BluetoothCharacteristic _writeCharacteristic;
+  List<String> _messages = new List<String>();
 
   void setBluetoothDevice(bluetoothDevice)
   {
@@ -29,25 +31,39 @@ class Messaging extends StatefulWidget {
     await _readCharacteristic.setNotifyValue(true);
     _readCharacteristic.value.listen((event) {
       var message = String.fromCharCodes(event.toList());
+      _messages.add(message);
       print("Message received from BLE server [" + message + "]");
     });
   }
 
   @override
   MessagingState createState() =>
-      MessagingState(_bluetoothDevice, _readCharacteristic, _writeCharacteristic);
+      MessagingState(_bluetoothDevice, _readCharacteristic, _writeCharacteristic, _messages);
 }
 
 class MessagingState extends State<Messaging> {
   BluetoothDevice _bluetoothDevice;
   BluetoothCharacteristic _readCharacteristic;
   BluetoothCharacteristic _writeCharacteristic;
+  List<String> _messages;
 
-  MessagingState(bluetoothDevice, readCharacteristic, writeCharacteristic)
+  MessagingState(bluetoothDevice, readCharacteristic, writeCharacteristic, messages)
   {
     _bluetoothDevice = bluetoothDevice;
     _readCharacteristic = readCharacteristic;
     _writeCharacteristic = writeCharacteristic;
+    _messages = messages;
+
+    // TODO: Terrible hack, use something like an Observable List?
+    Timer.periodic(Duration(milliseconds: 500), (timer) {
+      if (_messages.length > 10) {
+        _messages.removeAt(0);
+      }
+
+      setState(() {
+        _messages;
+      });
+    });
   }
 
   void sendTestMessage() async {
@@ -58,6 +74,9 @@ class MessagingState extends State<Messaging> {
   @override
   Widget build(BuildContext context) {
     return Column(children: <Widget>[
+      ..._messages.map((message) {
+        return Text(message);
+      }),
       FlatButton(
           color: Colors.blue,
           textColor: Colors.white,
