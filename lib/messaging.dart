@@ -1,21 +1,60 @@
 import "package:flutter/material.dart";
 
-import "package:waveshark/waveshark_bluetooth.dart";
+import "package:flutter_blue/flutter_blue.dart";
+import "dart:convert";
+
+class Messaging extends StatefulWidget {
+  BluetoothDevice _bluetoothDevice;
+  BluetoothCharacteristic _readCharacteristic;
+  BluetoothCharacteristic _writeCharacteristic;
+
+  void setBluetoothDevice(bluetoothDevice)
+  {
+    _bluetoothDevice = bluetoothDevice;
+  }
+
+  void setReadCharacteristic(readCharacteristic)
+  {
+    _readCharacteristic = readCharacteristic;
+  }
+
+  void setWriteCharacteristic(writeCharacteristic)
+  {
+    _writeCharacteristic = writeCharacteristic;
+  }
+
+  void subscribeToNotifications() async
+  {
+    // Get notifications on server value changes
+    await _readCharacteristic.setNotifyValue(true);
+    _readCharacteristic.value.listen((event) {
+      var message = String.fromCharCodes(event.toList());
+      print("Message received from BLE server [" + message + "]");
+    });
+  }
+
+  @override
+  MessagingState createState() =>
+      MessagingState(_bluetoothDevice, _readCharacteristic, _writeCharacteristic);
+}
 
 class MessagingState extends State<Messaging> {
-  Function _getWavesharkBluetooth;
+  BluetoothDevice _bluetoothDevice;
+  BluetoothCharacteristic _readCharacteristic;
+  BluetoothCharacteristic _writeCharacteristic;
 
-  MessagingState(getWavesharkBluetooth)
+  MessagingState(bluetoothDevice, readCharacteristic, writeCharacteristic)
   {
-    _getWavesharkBluetooth = getWavesharkBluetooth;
+    _bluetoothDevice = bluetoothDevice;
+    _readCharacteristic = readCharacteristic;
+    _writeCharacteristic = writeCharacteristic;
   }
 
-  // TODO: Add to List<String> of messages, call setState()
-  void sendTestMessage() {
-    _getWavesharkBluetooth().sendMessage("Test message");
+  void sendTestMessage() async {
+    await _writeCharacteristic.write(utf8.encode("Test message"));
   }
 
-  // TODO: Display incoming and outgoing messages
+  // TODO: Display incoming messages
   @override
   Widget build(BuildContext context) {
     return Column(children: <Widget>[
@@ -26,14 +65,4 @@ class MessagingState extends State<Messaging> {
           child: Text("Send test message")),
     ]);
   }
-}
-
-class Messaging extends StatefulWidget {
-  Function getWavesharkBluetooth;
-
-  Messaging({this.getWavesharkBluetooth});
-
-  @override
-  MessagingState createState() =>
-      MessagingState(getWavesharkBluetooth);
 }

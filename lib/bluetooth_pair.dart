@@ -2,38 +2,34 @@ import "package:flutter/material.dart";
 
 import "package:flutter_blue/flutter_blue.dart";
 import "package:shared_preferences/shared_preferences.dart";
-import "dart:convert";
 
-import "package:waveshark/waveshark_bluetooth.dart";
+import "package:waveshark/messaging.dart";
 
 class BluetoothPair extends StatefulWidget {
-  Function setWavesharkBluetooth;
-  Function getPaired;
-  Function setPaired;
+  Function _getMessaging;
+  Function _setPaired;
 
-  BluetoothPair(
-      {@required this.setWavesharkBluetooth,
-      @required this.getPaired,
-      @required this.setPaired});
+  BluetoothPair(getMessaging, setPaired)
+  {
+    _getMessaging = getMessaging;
+    _setPaired = setPaired;
+  }
 
   @override
-  BluetoothPairState createState() => BluetoothPairState(
-      setWavesharkBluetooth: setWavesharkBluetooth,
-      getPaired: getPaired,
-      setPaired: setPaired);
+  BluetoothPairState createState() => BluetoothPairState(_getMessaging, _setPaired);
 }
 
 class BluetoothPairState extends State<BluetoothPair> {
+  Function _getMessaging;
+  Function _setPaired;
+
+  BluetoothPairState(getMessaging, setPaired)
+  {
+    _getMessaging = getMessaging;
+    _setPaired = setPaired;
+  }
+
   bool _scanning = true;
-
-  Function setWavesharkBluetooth;
-  Function getPaired;
-  Function setPaired;
-
-  BluetoothPairState(
-      {@required this.setWavesharkBluetooth,
-      @required this.getPaired,
-      @required this.setPaired});
 
   String _deviceName;
 
@@ -41,7 +37,9 @@ class BluetoothPairState extends State<BluetoothPair> {
   void initState() {
     super.initState();
     _loadSettings();
-    WidgetsBinding.instance.addPostFrameCallback((_) => scanForDevices());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      scanForDevices();
+    });
   }
 
   void _loadSettings() async {
@@ -66,11 +64,8 @@ class BluetoothPairState extends State<BluetoothPair> {
   BluetoothCharacteristic _writeCharacteristic;
 
   void connectToDevice(String deviceName) async {
-    print("Attempting to connect to device [" + deviceName + "]");
-
     // Connect to device
     await _devices[deviceName].connect();
-    print("Connected to device [" + deviceName + "]");
 
     // Discover services
     List<BluetoothService> services =
@@ -94,11 +89,13 @@ class BluetoothPairState extends State<BluetoothPair> {
     });
 
     // We're paired now
-    setWavesharkBluetooth(WavesharkBluetooth(
-        _devices[deviceName], _readCharacteristic, _writeCharacteristic));
+    _getMessaging().setBluetoothDevice(_devices[deviceName]);
+    _getMessaging().setReadCharacteristic(_readCharacteristic);
+    _getMessaging().setWriteCharacteristic(_writeCharacteristic);
+    await _getMessaging().subscribeToNotifications();
     _deviceName = deviceName;
     await _saveSettings();
-    setPaired(true);
+    _setPaired(true);
   }
 
   void scanForDevices() {
@@ -107,10 +104,10 @@ class BluetoothPairState extends State<BluetoothPair> {
     FlutterBlue flutterBlue = FlutterBlue.instance;
     flutterBlue.startScan(timeout: Duration(seconds: 5)).then((value) {
       // Stop scanning
+      flutterBlue.stopScan();
       setState(() {
         _scanning = false;
       });
-      flutterBlue.stopScan();
       // subscription.cancel(); // TODO: Is this needed?
     });
 

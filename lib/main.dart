@@ -1,7 +1,6 @@
 import "package:flutter/material.dart";
 
 import "package:waveshark/messaging.dart";
-import "package:waveshark/waveshark_bluetooth.dart";
 import "package:waveshark/bluetooth_pair.dart";
 
 void main() {
@@ -32,26 +31,23 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  WavesharkBluetooth _wavesharkBluetooth;
   bool _paired = false;
+  Messaging _messaging;
+  BluetoothPair _bluetoothPair;
 
-  WavesharkBluetooth getWavesharkBluetooth() {
-    return _wavesharkBluetooth;
-  }
-
-  void setWavesharkBluetooth(wavesharkBluetooth)
+  _MyHomePageState()
   {
-    setState(() {
-      _wavesharkBluetooth = wavesharkBluetooth;
-      _wavesharkBluetooth.subscribeToNotifications();
-    });
+    _messaging = Messaging();
+    _bluetoothPair = BluetoothPair(getMessaging, setPaired);
   }
 
-  bool getPaired() {
-    return _paired;
+  Messaging getMessaging()
+  {
+    return _messaging;
   }
 
-  void setPaired(paired) {
+  void setPaired(paired)
+  {
     setState(() {
       _paired = paired;
     });
@@ -59,13 +55,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    var _bluetoothPair = BluetoothPair(
-        getPaired: getPaired,
-        setPaired: setPaired,
-        setWavesharkBluetooth: setWavesharkBluetooth);
-
-    var _messaging = Messaging(getWavesharkBluetooth: getWavesharkBluetooth);
-
     return Scaffold(
         appBar: AppBar(
           title: Text(widget.title),
