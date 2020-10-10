@@ -81,8 +81,7 @@ class MessagingState extends State<Messaging> {
   }
 
   void sendTestMessage() async {
-    // TODO: Use real device name / sender name
-    var message = "<WaveShark XXXXXX>abcde fghij klmno pqrst uvwxyz ABCDE FGHIJ KLMNO PQRST UVWXYZ 01234 567890";
+    var message = "abcde fghij klmno pqrst uvwxyz ABCDE FGHIJ KLMNO PQRST UVWXYZ 01234 567890";
 
     // Send BLE message in chunks
     var numChunks = message.length ~/ BLE_CHUNK_SIZE + 1;
