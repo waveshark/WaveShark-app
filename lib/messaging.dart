@@ -4,14 +4,16 @@ import "package:flutter_blue/flutter_blue.dart";
 import "dart:convert";
 import "dart:async";
 
+const String BLE_CHUNK_EOM = "<<<<<EOM>>>>>";
+const int BLE_CHUNK_SIZE = 20;
+const int BLE_DELAY_BETWEEN_CHUNKS_MILLIS = 100;
+
 class Messaging extends StatefulWidget {
   BluetoothDevice _bluetoothDevice;
   BluetoothCharacteristic _readCharacteristic;
   BluetoothCharacteristic _writeCharacteristic;
   List<String> _messages = new List<String>();
   String _currentMessage = "";
-
-  final String BLE_CHUNK_EOM = "<<<<<EOM>>>>>";
 
   void setBluetoothDevice(bluetoothDevice)
   {
@@ -79,7 +81,28 @@ class MessagingState extends State<Messaging> {
   }
 
   void sendTestMessage() async {
-    await _writeCharacteristic.write(utf8.encode("Test message"));
+    // TODO: Use real device name / sender name
+    var message = "<WaveShark XXXXXX>abcde fghij klmno pqrst uvwxyz ABCDE FGHIJ KLMNO PQRST UVWXYZ 01234 567890";
+
+    // Send BLE message in chunks
+    var numChunks = message.length ~/ BLE_CHUNK_SIZE + 1;
+    for (var chunkNum = 0; chunkNum < numChunks; chunkNum++) {
+      // Chunk range
+      var startIndex = chunkNum * BLE_CHUNK_SIZE;
+      var endIndex   = startIndex + BLE_CHUNK_SIZE;
+      if (endIndex >= message.length) endIndex = message.length - 1;
+
+      // Create the chunk
+      var chunk = message.substring(startIndex, endIndex);
+
+      // Send chunk to BLE server
+      await _writeCharacteristic.write(utf8.encode(chunk));
+      await Future.delayed(Duration(milliseconds: BLE_DELAY_BETWEEN_CHUNKS_MILLIS));
+    }
+
+    // Send EOM chunk to BLE server
+    await _writeCharacteristic.write(utf8.encode(BLE_CHUNK_EOM));
+    await Future.delayed(Duration(milliseconds: BLE_DELAY_BETWEEN_CHUNKS_MILLIS));
   }
 
   @override
