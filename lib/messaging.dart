@@ -9,6 +9,9 @@ class Messaging extends StatefulWidget {
   BluetoothCharacteristic _readCharacteristic;
   BluetoothCharacteristic _writeCharacteristic;
   List<String> _messages = new List<String>();
+  String _currentMessage = "";
+
+  final String BLE_CHUNK_EOM = "<<<<<EOM>>>>>";
 
   void setBluetoothDevice(bluetoothDevice)
   {
@@ -30,9 +33,17 @@ class Messaging extends StatefulWidget {
     // Get notifications on server value changes
     await _readCharacteristic.setNotifyValue(true);
     _readCharacteristic.value.listen((event) {
-      var message = String.fromCharCodes(event.toList());
-      _messages.add(message);
-      print("Message received from BLE server [" + message + "]");
+      var chunk = String.fromCharCodes(event.toList());
+      print("Chunk received from BLE server [" + chunk + "]");
+
+      if (chunk == BLE_CHUNK_EOM) {
+        _messages.add(_currentMessage);
+        print("Message received from BLE server [" + _currentMessage + "]");
+        _currentMessage = "";
+      }
+      else {
+        _currentMessage = _currentMessage + chunk;
+      }
     });
   }
 
@@ -46,6 +57,7 @@ class MessagingState extends State<Messaging> {
   BluetoothCharacteristic _readCharacteristic;
   BluetoothCharacteristic _writeCharacteristic;
   List<String> _messages;
+  String _currentMessage;
 
   MessagingState(bluetoothDevice, readCharacteristic, writeCharacteristic, messages)
   {
@@ -70,7 +82,6 @@ class MessagingState extends State<Messaging> {
     await _writeCharacteristic.write(utf8.encode("Test message"));
   }
 
-  // TODO: Display incoming messages
   @override
   Widget build(BuildContext context) {
     return Column(children: <Widget>[
