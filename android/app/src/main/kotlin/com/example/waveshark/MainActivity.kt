@@ -1,4 +1,4 @@
-package com.example.waveshark
+package app.waveshark.client
 
 import io.flutter.embedding.android.FlutterActivity
 
