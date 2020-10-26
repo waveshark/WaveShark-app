@@ -131,23 +131,31 @@ class BluetoothPairState extends State<BluetoothPair> {
 
   @override
   Widget build(BuildContext context) {
-    return _scanning
-        ? Column(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Text("Scanning for devices"),
-              CircularProgressIndicator()
-            ],
-          )
-        : Column(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-            Text("Choose a device to pair with"),
-            ..._devices.keys.map((deviceName) {
-              return FlatButton(
-                  color: Colors.green,
-                  textColor: Colors.white,
-                  onPressed: () => connectToDevice(deviceName),
-                  child: Text(deviceName));
-            })
-          ]);
+    Widget body;
+    if (_scanning) {
+      body = Column(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          Text("Scanning for devices"),
+          CircularProgressIndicator()
+        ],
+      );
+    } else {
+      body = Column(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
+        Text("Choose a device to pair with"),
+        ..._devices.keys.map((deviceName) {
+          return FlatButton(
+              color: Colors.green,
+              textColor: Colors.white,
+              onPressed: () => connectToDevice(deviceName),
+              child: Text(deviceName));
+        })
+      ]);
+    }
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [body]
+    );
   }
 }
