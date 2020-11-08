@@ -49,7 +49,7 @@ class _HypertextPortalState extends State<HypertextPortal> {
       // to allow calling Scaffold.of(context) so we can show a snackbar.
       body: Builder(builder: (BuildContext context) {
         return WebView(
-          initialUrl: 'http://example.com',
+          initialUrl: 'https://google.com',
           javascriptMode: JavascriptMode.unrestricted,
           onWebViewCreated: (WebViewController webViewController) {
             _controller.complete(webViewController);
@@ -258,9 +258,8 @@ class SampleMenu extends StatelessWidget {
 
   void _onNavigationDelegateExample(
       WebViewController controller, BuildContext context) async {
-    final String contentBase64 =
-        base64Encode(const Utf8Encoder().convert(kNavigationExamplePage));
-    await controller.loadData('foobar', baseUrl: 'http://localhost:8080', mimeType: 'text/html');
+    final String testString = 'zp/hvZDPh+G9tiDPhM6x4b2Qz4ThvbAgz4DOsc+B4b23z4PPhM6xz4TOseG9tyDOvM6/zrkgzrPOuc6zzr3hvb3Pg866zrXOuc69LCDhvaYg4byEzr3OtM+BzrXPgiDhvr/Okc64zrfOvc6x4b+Wzr/OuQ';
+    await controller.loadDataBase64(testString, mimeType: 'text/html');
   }
 
   Widget _getCookieList(String cookies) {

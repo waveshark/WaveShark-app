@@ -61,7 +61,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     Widget body;
     if (true) {
-      body = _bluetoothPair;
+      body = _htportal;
     }
 
     return Scaffold(
@@ -69,12 +69,12 @@ class _MyHomePageState extends State<MyHomePage> {
           title: Text(widget.title),
         ),
         body: Center(
-          child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-            Visibility(visible: !_paired, child: _bluetoothPair),
-            Visibility(visible: _paired, child: _messaging)
-          ]))
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+              Visibility(visible: !_paired, child: _bluetoothPair),
+              Visibility(visible: _paired, child: _messaging)
+            ]))
     );
   }
 }

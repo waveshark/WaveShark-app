@@ -1,8 +1,9 @@
-import "package:flutter/material.dart";
-
-import "package:flutter_blue/flutter_blue.dart";
-import "dart:convert";
 import "dart:async";
+import "dart:convert";
+import "package:flutter/material.dart";
+import "package:flutter_blue/flutter_blue.dart";
+
+import "package:waveshark/bluetooth_message.dart";
 
 const String BLE_CHUNK_EOM = "<<<<<EOM>>>>>";
 const int BLE_CHUNK_SIZE = 20;
@@ -12,7 +13,7 @@ class Messaging extends StatefulWidget {
   BluetoothDevice _bluetoothDevice;
   BluetoothCharacteristic _readCharacteristic;
   BluetoothCharacteristic _writeCharacteristic;
-  List<String> _messages = new List<String>();
+  List<ClientMessageBase> _messages = new List<ClientMessageBase>();
   String _currentMessage = "";
 
   void setBluetoothDevice(bluetoothDevice)
@@ -36,11 +37,18 @@ class Messaging extends StatefulWidget {
     await _readCharacteristic.setNotifyValue(true);
     _readCharacteristic.value.listen((event) {
       var chunk = String.fromCharCodes(event.toList());
+
       print("Chunk received from BLE server [" + chunk + "]");
 
       if (chunk == BLE_CHUNK_EOM) {
-        _messages.add(_currentMessage);
-        print("Message received from BLE server [" + _currentMessage + "]");
+        if (_currentMessage != "") {
+          print("Parsing message:" + _currentMessage);
+          var message = ClientMessageBase.fromTransport(_currentMessage);
+          if (message != null) {
+            _messages.add(message);
+            print("Message received from BLE server [" + message.toString() + "]");
+          }
+        }
         _currentMessage = "";
       }
       else {
@@ -58,7 +66,7 @@ class MessagingState extends State<Messaging> {
   BluetoothDevice _bluetoothDevice;
   BluetoothCharacteristic _readCharacteristic;
   BluetoothCharacteristic _writeCharacteristic;
-  List<String> _messages;
+  List<ClientMessageBase> _messages;
   String _currentMessage;
 
   MessagingState(bluetoothDevice, readCharacteristic, writeCharacteristic, messages)
@@ -107,8 +115,8 @@ class MessagingState extends State<Messaging> {
   @override
   Widget build(BuildContext context) {
     return Column(children: <Widget>[
-      ..._messages.map((message) {
-        return Text(message);
+      ..._messages.where((m) => m is ChatClientMessage).map((message) {
+        return Text((message as ChatClientMessage).text.toString());
       }),
       FlatButton(
           color: Colors.blue,
