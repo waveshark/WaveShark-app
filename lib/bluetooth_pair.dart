@@ -63,6 +63,7 @@ class BluetoothPairState extends State<BluetoothPair> {
   BluetoothCharacteristic _readCharacteristic;
   BluetoothCharacteristic _writeCharacteristic;
 
+  // TODO: Get device configuration after connecting (what is my sender name?, for example)
   void connectToDevice(String deviceName) async {
     // Connect to device
     await _devices[deviceName].connect();
