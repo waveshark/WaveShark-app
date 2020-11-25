@@ -61,6 +61,8 @@ class MessagingState extends State<Messaging> {
   List<String> _messages;
   String _currentMessage;
 
+  final textController = TextEditingController();
+
   MessagingState(bluetoothDevice, readCharacteristic, writeCharacteristic, messages)
   {
     _bluetoothDevice = bluetoothDevice;
@@ -80,8 +82,14 @@ class MessagingState extends State<Messaging> {
     });
   }
 
-  void sendTestMessage() async {
-    var message = "abcde fghij klmno pqrst uvwxyz ABCDE FGHIJ KLMNO PQRST UVWXYZ 01234 567890";
+  void sendMessage() async {
+    // No message to send?
+    if (textController.text == null || textController.text == "") {
+      return;
+    }
+
+    var message = textController.text.replaceAll("\n", "");
+    textController.clear();
 
     // Send BLE message in chunks
     var numChunks = message.length ~/ BLE_CHUNK_SIZE + 1;
@@ -89,7 +97,7 @@ class MessagingState extends State<Messaging> {
       // Chunk range
       var startIndex = chunkNum * BLE_CHUNK_SIZE;
       var endIndex   = startIndex + BLE_CHUNK_SIZE;
-      if (endIndex >= message.length) endIndex = message.length - 1;
+      if (endIndex >= message.length) endIndex = message.length;
 
       // Create the chunk
       var chunk = message.substring(startIndex, endIndex);
@@ -110,11 +118,22 @@ class MessagingState extends State<Messaging> {
       ..._messages.map((message) {
         return Text(message);
       }),
+      TextField(
+        controller: textController,
+        keyboardType: TextInputType.multiline,
+        minLines: 1,
+        maxLines: 2,
+        onChanged: (text) { if (text.contains("\n")) sendMessage(); },
+        decoration: InputDecoration(
+          hintText: "Enter your message"
+        )
+      ),
       FlatButton(
-          color: Colors.blue,
-          textColor: Colors.white,
-          onPressed: sendTestMessage,
-          child: Text("Send test message")),
+        color: Colors.blue,
+        textColor: Colors.white,
+        onPressed: sendMessage,
+        child: Text("Send")
+      )
     ]);
   }
 }
