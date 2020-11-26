@@ -35,19 +35,16 @@ class _MyHomePageState extends State<MyHomePage> {
   Messaging _messaging;
   BluetoothPair _bluetoothPair;
 
-  _MyHomePageState()
-  {
+  _MyHomePageState() {
     _messaging = Messaging();
     _bluetoothPair = BluetoothPair(getMessaging, setPaired);
   }
 
-  Messaging getMessaging()
-  {
+  Messaging getMessaging() {
     return _messaging;
   }
 
-  void setPaired(paired)
-  {
+  void setPaired(paired) {
     setState(() {
       _paired = paired;
     });
@@ -60,11 +57,11 @@ class _MyHomePageState extends State<MyHomePage> {
           title: Text(widget.title),
         ),
         body: Center(
-            child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-              Visibility(visible: !_paired, child: _bluetoothPair),
-              Visibility(visible: _paired, child: _messaging)
-            ])));
+            child: Padding(
+                padding: EdgeInsets.all(4.0),
+                child: Column(children: <Widget>[
+                  Visibility(visible: !_paired, child: _bluetoothPair),
+                  Visibility(visible: _paired, child: _messaging)
+                ]))));
   }
 }

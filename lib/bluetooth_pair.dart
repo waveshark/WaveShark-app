@@ -9,22 +9,21 @@ class BluetoothPair extends StatefulWidget {
   Function _getMessaging;
   Function _setPaired;
 
-  BluetoothPair(getMessaging, setPaired)
-  {
+  BluetoothPair(getMessaging, setPaired) {
     _getMessaging = getMessaging;
     _setPaired = setPaired;
   }
 
   @override
-  BluetoothPairState createState() => BluetoothPairState(_getMessaging, _setPaired);
+  BluetoothPairState createState() =>
+      BluetoothPairState(_getMessaging, _setPaired);
 }
 
 class BluetoothPairState extends State<BluetoothPair> {
   Function _getMessaging;
   Function _setPaired;
 
-  BluetoothPairState(getMessaging, setPaired)
-  {
+  BluetoothPairState(getMessaging, setPaired) {
     _getMessaging = getMessaging;
     _setPaired = setPaired;
   }
@@ -54,9 +53,11 @@ class BluetoothPairState extends State<BluetoothPair> {
     prefs.setString("deviceName", _deviceName);
   }
 
-  final String _desiredServiceUUID             = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
-  final String _desiredReadCharacteristicUUID  = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
-  final String _desiredWriteCharacteristicUUID = "6e400002-b5a3-f393-e0a9-e50e24dcca9e";
+  final String _desiredServiceUUID = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
+  final String _desiredReadCharacteristicUUID =
+      "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
+  final String _desiredWriteCharacteristicUUID =
+      "6e400002-b5a3-f393-e0a9-e50e24dcca9e";
 
   final Map<String, BluetoothDevice> _devices = Map<String, BluetoothDevice>();
 
@@ -134,21 +135,27 @@ class BluetoothPairState extends State<BluetoothPair> {
   Widget build(BuildContext context) {
     return _scanning
         ? Column(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text("Scanning for devices"),
               CircularProgressIndicator()
             ],
           )
-        : Column(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-            Text("Choose a device to pair with"),
-            ..._devices.keys.map((deviceName) {
-              return FlatButton(
-                  color: Colors.green,
-                  textColor: Colors.white,
-                  onPressed: () => connectToDevice(deviceName),
-                  child: Text(deviceName));
-            })
-          ]);
+        : Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+                Text("Choose a device to pair with"),
+                ..._devices.keys.map((deviceName) {
+                  return FlatButton(
+                      color: Colors.green,
+                      textColor: Colors.white,
+                      onPressed: () => connectToDevice(deviceName),
+                      child: Text(deviceName));
+                })
+              ]);
   }
 }
