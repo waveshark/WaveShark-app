@@ -259,7 +259,7 @@ class SampleMenu extends StatelessWidget {
   void _onNavigationDelegateExample(
       WebViewController controller, BuildContext context) async {
     final String testString = 'zp/hvZDPh+G9tiDPhM6x4b2Qz4ThvbAgz4DOsc+B4b23z4PPhM6xz4TOseG9tyDOvM6/zrkgzrPOuc6zzr3hvb3Pg866zrXOuc69LCDhvaYg4byEzr3OtM+BzrXPgiDhvr/Okc64zrfOvc6x4b+Wzr/OuQ';
-    await controller.loadDataBase64(testString, mimeType: 'text/html');
+    await controller.loadFileUrl("foo");
   }
 
   Widget _getCookieList(String cookies) {

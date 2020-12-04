@@ -1,5 +1,6 @@
 import 'dart:io';
 import "package:flutter/material.dart";
+import 'package:flutter/services.dart' show rootBundle;
 
 import "package:waveshark/htportal.dart";
 import "package:waveshark/messaging.dart";
@@ -68,13 +69,7 @@ class _MyHomePageState extends State<MyHomePage> {
         appBar: AppBar(
           title: Text(widget.title),
         ),
-        body: Center(
-            child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-              Visibility(visible: !_paired, child: _bluetoothPair),
-              Visibility(visible: _paired, child: _messaging)
-            ]))
+        body: body
     );
   }
 }
